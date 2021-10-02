@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 public class VendingMachineItem {
-    private double price;
+    private Double price;
     private String name;
     private String slotLocation;
     private int itemStock;
@@ -19,8 +19,20 @@ public class VendingMachineItem {
         this.itemStock = itemStock;
     }
 
+    public void depleteStock() {
+        itemStock -= 1;
+    }
+
     public int getItemStock() {
         return itemStock;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Double getPrice() {
+        return price;
     }
 
     @Override
