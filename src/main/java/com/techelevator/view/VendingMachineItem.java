@@ -35,6 +35,10 @@ public class VendingMachineItem {
         return price;
     }
 
+    public String getSlotLocation() {
+        return slotLocation;
+    }
+
     @Override
     public String toString() {
         return  slotLocation + " | " +

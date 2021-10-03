@@ -1,10 +1,13 @@
 package com.techelevator;
 
 import com.techelevator.view.Menu;
+import com.techelevator.view.TELog;
+import com.techelevator.view.TELogException;
 import com.techelevator.view.VendingMachineItem;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class VendingMachineCLI {
@@ -16,12 +19,16 @@ public class VendingMachineCLI {
 	private static final String PURCHASE_MENU_OPTION_SELECT_PRODUCT = "Select Product";
 	private static final String PURCHASE_MENU_OPTION_FINISH_TRANSACTION = "Finish Transaction";
 	private static Double money = 0.00;
+	private static SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");
+	private static Date now = new Date();
 
 	private static final String[] MAIN_MENU_OPTIONS = { MAIN_MENU_OPTION_DISPLAY_ITEMS, MAIN_MENU_OPTION_PURCHASE, MAIN_MENU_OPTION_EXIT};
 	private static final String[] PURCHASE_MENU_OPTIONS = {PURCHASE_MENU_OPTION_FEED_MONEY, PURCHASE_MENU_OPTION_SELECT_PRODUCT, PURCHASE_MENU_OPTION_FINISH_TRANSACTION};
 
 	private static String[] fileArray = new String[4];
 	private static Map<String, VendingMachineItem> vendingMachineItemMap = new HashMap();
+	private static List<String> logMessageList = new ArrayList();
+	private static StringBuilder sb = new StringBuilder();
 
 	static File vendingMachineStockFile = new File("C:\\Users\\arrow\\Desktop\\pair programming\\capstone\\vendingmachine.csv");
 
@@ -50,6 +57,11 @@ public class VendingMachineCLI {
 		this.money -= money;
 	}
 
+	// test purposes
+	public Double getMoney() {
+		return money;
+	}
+
 	public void run() {
 
 		while (true) {
@@ -68,7 +80,9 @@ public class VendingMachineCLI {
 					// add money to the current money provided counter
 					System.out.println("Amount to feed: ");
 					try {Scanner userInput = new Scanner(System.in);
-						feedMoney(Integer.parseInt(userInput.nextLine()));
+						int amountToFeed = Integer.parseInt(userInput.nextLine());
+						logMessageList.add(sdf.format(now) + " " + "FEED MONEY: $" + money + " $" + (money + amountToFeed));
+						feedMoney(amountToFeed);
 					} catch (NumberFormatException e) {
 						System.out.println("Money must be in whole dollar amounts");
 					}
@@ -96,6 +110,7 @@ public class VendingMachineCLI {
 								// print receipt
 								System.out.println(selectedItem.getName() + " | " + selectedItem.getPrice() + " | Current Money Provided: $" + money);
 								System.out.println("Crunch Crunch, Yum!");
+								logMessageList.add(sdf.format(now) + " " + selectedItem.getName() + " " + selectedItem.getSlotLocation() + " $" + (money + selectedItem.getPrice()) + " $" + money);
 								choice = (String) menu.getChoiceFromOptions(PURCHASE_MENU_OPTIONS);
 							} else if (selectedItem.toString().contains("B")) {
 								subtractMoney(selectedItem.getPrice());
@@ -103,6 +118,7 @@ public class VendingMachineCLI {
 								// print receipt
 								System.out.println(selectedItem.getName() + " | " + selectedItem.getPrice() + " | Current Money Provided: $" + money);
 								System.out.println("Munch Munch, Yum!");
+								logMessageList.add(sdf.format(now) + " " + selectedItem.getName() + " " + selectedItem.getSlotLocation() + " $" + (money + selectedItem.getPrice()) + " $" + money);
 								choice = (String) menu.getChoiceFromOptions(PURCHASE_MENU_OPTIONS);
 							} else if (selectedItem.toString().contains("C")) {
 								subtractMoney(selectedItem.getPrice());
@@ -110,6 +126,7 @@ public class VendingMachineCLI {
 								// print receipt
 								System.out.println(selectedItem.getName() + " | " + selectedItem.getPrice() + " | Current Money Provided: $" + money);
 								System.out.println("Glug Glug, Yum!");
+								logMessageList.add(sdf.format(now) + " " + selectedItem.getName() + " " + selectedItem.getSlotLocation() + " $" + (money + selectedItem.getPrice()) + " $" + money);
 								choice = (String) menu.getChoiceFromOptions(PURCHASE_MENU_OPTIONS);
 							} else {
 								if (selectedItem.toString().contains("D")) {
@@ -118,6 +135,7 @@ public class VendingMachineCLI {
 									// print receipt
 									System.out.println(selectedItem.getName() + " | " + selectedItem.getPrice() + " | Current Money Provided: $" + money);
 									System.out.println("Chew Chew, Yum!");
+									logMessageList.add(sdf.format(now) + " " + selectedItem.getName() + " " + selectedItem.getSlotLocation() + " $" + (money + selectedItem.getPrice()) + " $" + money);
 									choice = (String) menu.getChoiceFromOptions(PURCHASE_MENU_OPTIONS);
 								}
 							}
@@ -129,8 +147,15 @@ public class VendingMachineCLI {
 				}
 
 				while (choice.equals(PURCHASE_MENU_OPTION_FINISH_TRANSACTION)) {
+					// dispense change
+					logMessageList.add(sdf.format(now) + " " + "GIVE CHANGE: $" + money + " $" + 0.00);
 					System.out.println("Your change is: $" + money);
 					money = 0.00;
+					// log purchases
+					for (String message : logMessageList) {
+						sb.append(message + "\n");
+					}
+					TELog.log(sb.toString());
 					break;
 				}
 
@@ -149,7 +174,7 @@ public class VendingMachineCLI {
 		try (Scanner stockVendingMachine = new Scanner(vendingMachineStockFile)) {
 			String oneLineOfFile = stockVendingMachine.nextLine();
 			fileArray = oneLineOfFile.split("\\|");
-			VendingMachineItem A1 = new VendingMachineItem(fileArray[0],fileArray[1],Double.parseDouble(fileArray[2]),0);
+			VendingMachineItem A1 = new VendingMachineItem(fileArray[0],fileArray[1],Double.parseDouble(fileArray[2]),5);
 			vendingMachineItemMap.put("A1", A1);
 			oneLineOfFile = stockVendingMachine.nextLine();
 			fileArray = oneLineOfFile.split("\\|");
@@ -209,6 +234,7 @@ public class VendingMachineCLI {
 		Menu menu = new Menu(System.in, System.out);
 		VendingMachineCLI cli = new VendingMachineCLI(menu);
 		cli.run();
+
 
 
 	}
