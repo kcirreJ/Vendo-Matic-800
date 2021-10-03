@@ -30,7 +30,7 @@ public class VendingMachineCLI {
 	private static List<String> logMessageList = new ArrayList();
 	private static StringBuilder sb = new StringBuilder();
 
-	static File vendingMachineStockFile = new File("C:\\Users\\arrow\\Desktop\\pair programming\\capstone\\vendingmachine.csv");
+	static File vendingMachineStockFile = new File("vendingmachine.csv");
 
 	private Menu menu;
 
